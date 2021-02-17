@@ -9,18 +9,18 @@
           "tokenizer": {
               "my_tokenizer": {
                   "type": "ngram",
-                  "min_gram": 2,
+                  "min_gram": 1,
                   "max_gram": 10,
+                  "tokenizer": "lowercase",
                   "token_chars": [
                       "letter",
                       "digit",
                       "whitespace",
                       "symbol",
                       "punctuation"
-
                   ]
               }
-
+            
           }
       },
       "max_ngram_diff": 50
