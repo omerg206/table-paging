@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "author": {
+      "type": "text",
+      "copy_to": "test",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "date": {
+      "type": "date",
+      "copy_to": "test"
+    },
+    "description": {
+      "type": "text",
+      "copy_to": "test",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+      
+    },
+    "email": {
+      "type": "text",
+      "copy_to": "test",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    },
+    "id": {
+      "type": "long",
+      "copy_to": "test"
+    },
+    "system": {
+      "type": "long",
+      "copy_to": "test"
+    },
+    "test": {
+      "type": "text",
+      "analyzer": "my_analyzer",
+      "search_analyzer": "standard",
+      "fields": {
+        "keyword": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    }
+  }
+}
