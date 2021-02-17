@@ -18,7 +18,11 @@ export interface GetTableDateFilters {
     sortFieldName?: keyof TableData;
     textFilter?: string;
 
-    
+    cursorFiledName?: string;
+    cursorValue?: string | number| Date;
+    cursorOrder?: 'desc' | 'asc';
+
+
     pageNumber: number;
     pageSize: number;
     totalResultCount?: number;

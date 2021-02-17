@@ -24,8 +24,15 @@ export const getTableData = async (req: Request, res: Response) => {
         sortFieldName: queryParams?.sortFieldName as keyof TableData,
         textFilter: queryParams?.textFilter as string,
         pageNumber: queryParams?.pageNumber as any,
-        pageSize: queryParams?.pageSize as any
+        pageSize: queryParams?.pageSize as any,
+        cursorFiledName: queryParams?.cursorFiledName as string,
+        cursorOrder: queryParams?.cursorOrder as 'desc' | 'asc',
+        cursorValue: queryParams?.cursorValue as any
     }
+
+
+
+
 
     // const sortParamsNonNull: Partial<GetTableDateFilters> = reduce(sortParams, (acc: Partial<GetTableDateFilters>, value: any, key: any) => {
     //     if (sortParams[key]) {
@@ -36,7 +43,9 @@ export const getTableData = async (req: Request, res: Response) => {
     // }, {});
 
     try {
-        const { hits } = await getDataFromElastic(sortParams);
+        const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
+        const isCursorFieldOfText = await isFieldOfTextType(sortParams, "cursorFiledName");
+        const { hits } = await getDataFromElastic(sortParams, isCursorFieldOfText, isSortFieldOfText);
         return res.status(200).json({ payload: hits, total: hits.total });
     } catch (e) {
         return res.status(503).json({ error: `elastic error ${e}` });
@@ -48,9 +57,9 @@ export const getTableData = async (req: Request, res: Response) => {
 
 
 
-const getDataFromElastic = async (sortFilters: GetTableDateFilters): Promise<elasticsearch.SearchResponse<unknown>> => {
+const getDataFromElastic = async (sortFilters: GetTableDateFilters, isCursorFieldOfText: boolean = false, isSortFieldOfTextType: boolean = false): Promise<elasticsearch.SearchResponse<unknown>> => {
     try {
-        const query: any = createGetTableDataFilterElasticQuery(sortFilters);
+        const query: any = createGetTableDataFilterElasticQuery(sortFilters, isCursorFieldOfText, isSortFieldOfTextType);
         return await client.search({ index, body: query });
     } catch (e) {
         console.error(e);
@@ -60,7 +69,6 @@ const getDataFromElastic = async (sortFilters: GetTableDateFilters): Promise<ela
 
 export const insertMockToElastic = async () => {
     try {
-        await createIndex();
         const isIndexEmpty = await client.indices.stats({ index }).then((res) => res.indices[index].total.docs.count === 0);
 
         if (isIndexEmpty) {
@@ -85,6 +93,17 @@ export const insertMockToElastic = async () => {
     }
 
 }
+
+const isFieldOfTextType = async (sortParams: GetTableDateFilters, fieldName: "sortFieldName" |  "cursorFiledName"): Promise<boolean> => {
+    try {
+        const filedValue = sortParams[fieldName]
+        const mapping = await client.indices.getMapping({ index })
+        return (filedValue && mapping[index].mappings._doc.properties[filedValue].type === 'text') as boolean;
+    } catch (e) {
+        throw e
+    }
+};
+
 
 const deleteIndex = async () => {
     const isIndexExists = await client.indices.exists({ index });
