@@ -1,28 +1,40 @@
 {
- 
-      "analysis": {
-          "analyzer": {
-              "my_analyzer": {
-                  "tokenizer": "my_tokenizer"
-              }
-          },
-          "tokenizer": {
-              "my_tokenizer": {
-                  "type": "ngram",
-                  "min_gram": 1,
-                  "max_gram": 10,
-                  "tokenizer": "lowercase",
-                  "token_chars": [
-                      "letter",
-                      "digit",
-                      "whitespace",
-                      "symbol",
-                      "punctuation"
-                  ]
-              }
-            
-          }
-      },
-      "max_ngram_diff": 50
+  "analysis": {
+    "filter": {
+      "truncate_filter": {
+        "type": "truncate",
+        "min_gram": 1,
+        "token_chars": [
+          "letter",
+          "digit",
+          "whitespace",
+          "symbol",
+          "punctuation"
+        ],
+        "length": 10
+      }
+    },
+    "analyzer": {
+      "my_analyzer": {
+        "tokenizer": "my_tokenizer",
+        "filter": ["truncate_filter", "lowercase"]
+      }
+    },
+    "tokenizer": {
+      "my_tokenizer": {
+        "type": "ngram",
+        "min_gram": 1,
+        "max_gram": 10,
+        "tokenizer": "lowercase",
+        "token_chars": [
+          "letter",
+          "digit",
+          "whitespace",
+          "symbol",
+          "punctuation"
+        ]
+      }
+    }
+  },
+  "max_ngram_diff": 50
 }
-
