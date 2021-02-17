@@ -52,24 +52,25 @@ export const insertMockToElastic = async () => {
     try {
         const isIndexExists = await client.indices.exists({ index });
 
-        if (!isIndexExists) {
-            const rawSetting = fs.readFileSync(path.join(__dirname, "../utils/settings.json"));
-            const parsedSetting: any[] = JSON.parse(rawSetting.toString());
+        if (isIndexExists) {
 
-            const rawMapping = fs.readFileSync(path.join(__dirname, "../utils/mapping.json"));
-            const parsedMapping: any[] = JSON.parse(rawMapping.toString());
-
-
-            await client.indices.create({
-                index, body: {
-                    settings: parsedSetting,
-                    // mappings: parsedMapping
-                }
-            });
-
-             await client.indices.putMapping({ index, type: "_doc", body: parsedMapping, });
-
+            client.indices.delete({ index });
         }
+
+
+        const rawSetting = fs.readFileSync(path.join(__dirname, "../utils/settings.json"));
+        const parsedSetting: any[] = JSON.parse(rawSetting.toString());
+
+        const rawMapping = fs.readFileSync(path.join(__dirname, "../utils/mapping.json"));
+        const parsedMapping: any[] = JSON.parse(rawMapping.toString());
+
+        await client.indices.create({
+            index, body: {
+                settings: parsedSetting,
+                mappings: parsedMapping
+            }
+        });
+
 
 
 
