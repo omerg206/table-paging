@@ -21,6 +21,7 @@ export interface GetTableDateFilters {
     cursorFiledName?: string;
     cursorValue?: string | number| Date;
     cursorOrder?: 'desc' | 'asc';
+    cursorId?: number;
 
 
     pageNumber: number;

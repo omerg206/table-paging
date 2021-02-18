@@ -27,7 +27,8 @@ export const getTableData = async (req: Request, res: Response) => {
         pageSize: queryParams?.pageSize as any,
         cursorFiledName: queryParams?.cursorFiledName as string,
         cursorOrder: queryParams?.cursorOrder as 'desc' | 'asc',
-        cursorValue: queryParams?.cursorValue as any
+        cursorValue: queryParams?.cursorValue as any,
+        cursorId: queryParams?.cursorId as any
     }
 
 
@@ -50,9 +51,6 @@ export const getTableData = async (req: Request, res: Response) => {
     } catch (e) {
         return res.status(503).json({ error: `elastic error ${e}` });
     }
-
-
-
 }
 
 

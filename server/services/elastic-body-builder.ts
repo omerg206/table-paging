@@ -1,5 +1,5 @@
 import { GetTableDateFilters } from "../../shared/table-data.type";
-import bodybuilder from 'bodybuilder';
+import bodybuilder, { Bodybuilder } from 'bodybuilder';
 
 
 
@@ -15,7 +15,7 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
     }
 
     if (filters.sortFieldName) {
-        filterQuery.sort(getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc')
+        setSortQuery(filters, filterQuery, isCursorFieldOfText, isSortFieldOfTextType);
     }
 
     if (filters.dateFilter) {
@@ -23,7 +23,7 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
     }
 
     if (filters.cursorValue) {
-        filterQuery.query("range", getFiledNameForRangeQuery(filters, "cursorFiledName", isCursorFieldOfText), getCursorRange(filters)) //cursor filter 
+        filterQuery.rawOption("search_after", getSearchAfterValues(filters));
     }
 
     return filterQuery.build();
@@ -36,4 +36,27 @@ const getCursorRange = (filters: GetTableDateFilters): Object => {
 
 const getFiledNameForRangeQuery = (filters: GetTableDateFilters, fieldName: keyof GetTableDateFilters, isTextType: boolean): string => {
     return `${filters[fieldName]}${isTextType ? '.keyword' : ''}`;
+}
+
+
+const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder, isCursorFieldOfText: boolean, isSortFieldOfTextType: boolean) => {
+    // if (filters.cursorValue) {
+        filterQuery.sort([
+            {[getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType)] : filters.sortOrder || 'desc'},
+            {id : 'asc'}
+        ]);
+    // } else {
+    //     filterQuery.sort(getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
+    // }
+}
+
+const getSearchAfterValues = (filters: GetTableDateFilters): any[] => {
+    let res: (number | string | Date) [] = [+filters.cursorId!];
+
+    if (filters.sortFieldName) {
+        res.unshift(filters.cursorValue!)
+    }
+
+
+    return res;
 }
