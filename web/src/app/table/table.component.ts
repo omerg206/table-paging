@@ -62,7 +62,7 @@ export class TableComponent implements OnInit {
         let sortValueAndId;
         let  nextOrPreviousPage: "nextPage" | "previousPage" = "nextPage";
 
-        if (pageEvent.previousPageIndex != null) {
+        if (pageEvent.previousPageIndex != null && pageEvent.pageIndex !== pageEvent.previousPageIndex) {
           nextOrPreviousPage = pageEvent.pageIndex > pageEvent.previousPageIndex ? 'nextPage' : 'previousPage'
           sortValueAndId = this.dataSource.getSortValueAndId(nextOrPreviousPage, "id", this.sort.active as keyof TableData)
         }
