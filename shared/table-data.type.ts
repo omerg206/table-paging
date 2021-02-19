@@ -9,20 +9,16 @@ export interface TableData {
 
 
 
-export interface GetTableDateFilters {
-    dateFilter?: Date | number;
-    sortOrder?: 'desc' | 'asc';
-    sortFieldName?: keyof TableData;
-    textFilter?: string;
-
-    cursorFiledName?: string;
-    cursorValue?: string | number | Date;
-    cursorOrder?: 'desc' | 'asc';
-    cursorId?: number;
-
-
+export interface GetTableDateFilters<T = TableData> {
     pageNumber: number;
     pageSize: number;
+    sortOrder: 'desc' | 'asc';
+    sortFieldName: keyof TableData;
+    sortValue?: string | number | Date  | null;
+    sortId?: number | null;
+    dateFilter?: Date | number;
+    textFilter?: string;
+    idKey: keyof T;
 }
 
 export interface TableData {

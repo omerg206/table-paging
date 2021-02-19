@@ -19,7 +19,7 @@ export class TableComponent implements OnInit {
 
   displayedColumns = ["id", "description", "date", "author", "email", "system"];
 
-  pageSizeOptions: number[] =  [3,5,10];
+  pageSizeOptions: number[] = [3, 5, 10];
 
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
@@ -33,7 +33,7 @@ export class TableComponent implements OnInit {
   ngOnInit(): void {
     this.dataSource = new TableDataSource(this.tableService);
 
-    this.dataSource.loadData(this.createLoadDataParams({pageSize: this.pageSizeOptions[0]} as GetTableDateFilters));
+    this.dataSource.loadData(this.createLoadDataParams({ pageSize: this.pageSizeOptions[0] } as GetTableDateFilters));
   }
 
   ngAfterViewInit() {
@@ -47,14 +47,15 @@ export class TableComponent implements OnInit {
         tap(() => {
           this.paginator.pageIndex = 0;
 
-          this.dataSource.loadData(this.createLoadDataParams({} as GetTableDateFilters))
+          this.dataSource.loadData(this.createLoadDataParams())
         })
       )
       .subscribe();
 
     merge(this.sort.sortChange, this.paginator.page)
       .pipe(
-        tap(() => this.dataSource.loadData(this.createLoadDataParams({} as GetTableDateFilters)))
+       debounceTime(100),
+        tap((ele) => this.dataSource.loadData(this.createLoadDataParams()))
       )
       .subscribe();
 
@@ -65,13 +66,17 @@ export class TableComponent implements OnInit {
     textFilter = this.input.nativeElement.value,
     sortFieldName = this.sort.active as keyof TableData,
     sortOrder = this.sort.direction === '' ? 'asc' : this.sort.direction,
-  }: GetTableDateFilters): GetTableDateFilters {
+    sortId = null, sortValue = null, idKey = 'id'
+  }: Partial<GetTableDateFilters> = {}): GetTableDateFilters {
     return {
       pageNumber,
       pageSize,
       textFilter,
       sortFieldName,
-      sortOrder
+      sortOrder,
+      sortId,
+      sortValue,
+      idKey
     }
   }
 

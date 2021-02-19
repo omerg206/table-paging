@@ -4,7 +4,7 @@ import bodybuilder, { Bodybuilder } from 'bodybuilder';
 
 
 
-export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters, isCursorFieldOfText: boolean, isSortFieldOfTextType: boolean): any => {
+export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters,  isSortFieldOfTextType: boolean): any => {
     let filterQuery = bodybuilder().size(+filters.pageSize);
 
 
@@ -15,14 +15,14 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
     }
 
     if (filters.sortFieldName) {
-        setSortQuery(filters, filterQuery, isCursorFieldOfText, isSortFieldOfTextType);
+        setSortQuery(filters, filterQuery, isSortFieldOfTextType);
     }
 
     if (filters.dateFilter) {
         filterQuery.query("range", "date", { lte: filters.dateFilter })
     }
 
-    if (filters.cursorValue) {
+    if (filters.sortValue) {
         filterQuery.rawOption("search_after", getSearchAfterValues(filters));
     }
 
@@ -30,33 +30,32 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
 }
 
 
-const getCursorRange = (filters: GetTableDateFilters): Object => {
-    return { [`${filters.cursorOrder === 'asc' ? 'gte' : 'lte'}`]: filters.cursorValue }
-}
-
 const getFiledNameForRangeQuery = (filters: GetTableDateFilters, fieldName: keyof GetTableDateFilters, isTextType: boolean): string => {
     return `${filters[fieldName]}${isTextType ? '.keyword' : ''}`;
 }
 
 
-const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder, isCursorFieldOfText: boolean, isSortFieldOfTextType: boolean) => {
+const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder,  isSortFieldOfTextType: boolean) => {
     // if (filters.cursorValue) {
-    filterQuery.sort(
-        getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
+        if (filters.sortFieldName !== filters.idKey) {
+            filterQuery.sort(
+                getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
+        } else {
+            filterQuery.sort(filters.idKey, 'asc');  
+        }
+   
 
-    if (filters.sortFieldName !== 'id') {
-        filterQuery.sort("id", 'asc');
-    }
+   
     // } else {
     //     filterQuery.sort(getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
     // }
 }
 
 const getSearchAfterValues = (filters: GetTableDateFilters): any[] => {
-    let res: (number | string | Date)[] = [+filters.cursorId!];
+    let res: (number | string | Date)[] = [+filters.sortId!];
 
-    if (filters.sortFieldName) {
-        res.unshift(filters.cursorValue!)
+    if (filters.sortFieldName !== filters.idKey) {
+        res.unshift(filters.sortValue!)
     }
 
 

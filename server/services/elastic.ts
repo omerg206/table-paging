@@ -20,8 +20,7 @@ export const getTableData = async (req: Request, res: Response) => {
     try {
         const sortParams: GetTableDateFilters = JSON.parse(req.query.filters as string);
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
-        const isCursorFieldOfText = await isFieldOfTextType(sortParams, "cursorFiledName");
-        const  elasticData  = await getDataFromElastic(sortParams, isCursorFieldOfText, isSortFieldOfText);
+        const  elasticData  = await getDataFromElastic(sortParams, isSortFieldOfText);
 
         const response : ServerGetTableDataReposes = {
             payload: { data: convertElasticDocToTableData(elasticData), totalResultCount: elasticData.hits.total }
@@ -32,15 +31,16 @@ export const getTableData = async (req: Request, res: Response) => {
     }
 }
 
+
 const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unknown>): TableData[] => {
     return rawData.hits.hits.map(element => element._source as TableData);
 
 }
 
 
-const getDataFromElastic = async (sortFilters: GetTableDateFilters, isCursorFieldOfText: boolean = false, isSortFieldOfTextType: boolean = false): Promise<elasticsearch.SearchResponse<unknown>> => {
+const getDataFromElastic = async (sortFilters: GetTableDateFilters,  isSortFieldOfTextType: boolean = false): Promise<elasticsearch.SearchResponse<unknown>> => {
     try {
-        const query: any = createGetTableDataFilterElasticQuery(sortFilters, isCursorFieldOfText, isSortFieldOfTextType);
+        const query: any = createGetTableDataFilterElasticQuery(sortFilters, isSortFieldOfTextType);
         return await client.search({ index, body: query });
     } catch (e) {
         console.error(e);
@@ -76,7 +76,7 @@ export const insertMockToElastic = async () => {
 
 }
 
-const isFieldOfTextType = async (sortParams: GetTableDateFilters, fieldName: "sortFieldName" | "cursorFiledName"): Promise<boolean> => {
+const isFieldOfTextType = async (sortParams: GetTableDateFilters, fieldName: "sortFieldName"): Promise<boolean> => {
     try {
         const filedValue = sortParams[fieldName]
         const mapping = await client.indices.getMapping({ index })
