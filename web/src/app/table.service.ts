@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { GetTableDateFilters, ServerGetTableDataReposes, TableData } from '../../../shared/table-data.type';
+import { PageEvent } from '@angular/material/paginator';
 
 @Injectable({
   providedIn: 'root'
@@ -15,9 +16,6 @@ export class TableService {
   constructor(private http: HttpClient) {
 
   }
-
-
-
 
   getTableData(params: GetTableDateFilters): Observable<TableData[]> {
     return this.http.get<ServerGetTableDataReposes>('http://localhost:3000' + Routes.GET_TABLE_DATA, {
@@ -31,4 +29,10 @@ export class TableService {
       })
     );
   }
+
+
+
+ 
+
+
 }

@@ -14,11 +14,12 @@ export interface GetTableDateFilters<T = TableData> {
     pageSize: number;
     sortOrder: 'desc' | 'asc';
     sortFieldName: keyof TableData;
+    idKey: keyof T;
+    nextOrPreviousPage: "nextPage" | "previousPage";
     sortValue?: string | number | Date  | null;
     sortId?: number | null;
     dateFilter?: Date | number;
     textFilter?: string;
-    idKey: keyof T;
 }
 
 export interface TableData {

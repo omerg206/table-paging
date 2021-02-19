@@ -19,11 +19,12 @@ const client = new elasticsearch.Client({
 export const getTableData = async (req: Request, res: Response) => {
     try {
         const sortParams: GetTableDateFilters = JSON.parse(req.query.filters as string);
+        handleDateValue(sortParams);
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
-        const  elasticData  = await getDataFromElastic(sortParams, isSortFieldOfText);
+        const elasticData = await getDataFromElastic(sortParams, isSortFieldOfText);
 
-        const response : ServerGetTableDataReposes = {
-            payload: { data: convertElasticDocToTableData(elasticData), totalResultCount: elasticData.hits.total }
+        const response: ServerGetTableDataReposes = {
+            payload: { data: convertElasticDocToTableData(elasticData, sortParams.nextOrPreviousPage), totalResultCount: elasticData.hits.total }
         }
         return res.status(200).json(response);
     } catch (e) {
@@ -32,13 +33,19 @@ export const getTableData = async (req: Request, res: Response) => {
 }
 
 
-const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unknown>): TableData[] => {
-    return rawData.hits.hits.map(element => element._source as TableData);
+const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unknown>, nextOrPreviousPage: "nextPage" | "previousPage"): TableData[] => {
+    const rawHits = nextOrPreviousPage === 'nextPage' ? rawData.hits.hits : rawData.hits.hits.reverse();
+
+    return rawHits.map(element => element._source as TableData);
+}
+
+const handleDateValue = (sortParams: GetTableDateFilters) => {
+    sortParams.sortValue = sortParams.sortFieldName === 'date' ? new Date(sortParams.sortValue as string).getTime() : sortParams.sortFieldName;
 
 }
 
 
-const getDataFromElastic = async (sortFilters: GetTableDateFilters,  isSortFieldOfTextType: boolean = false): Promise<elasticsearch.SearchResponse<unknown>> => {
+const getDataFromElastic = async (sortFilters: GetTableDateFilters, isSortFieldOfTextType: boolean = false): Promise<elasticsearch.SearchResponse<unknown>> => {
     try {
         const query: any = createGetTableDataFilterElasticQuery(sortFilters, isSortFieldOfTextType);
         return await client.search({ index, body: query });

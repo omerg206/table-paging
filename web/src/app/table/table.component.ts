@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { fromEvent, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
@@ -38,8 +38,6 @@ export class TableComponent implements OnInit {
 
   ngAfterViewInit() {
 
-    this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
-
     fromEvent(this.input.nativeElement, 'keyup')
       .pipe(
         debounceTime(150),
@@ -52,20 +50,38 @@ export class TableComponent implements OnInit {
       )
       .subscribe();
 
-    merge(this.sort.sortChange, this.paginator.page)
-      .pipe(
-       debounceTime(100),
-        tap((ele) => this.dataSource.loadData(this.createLoadDataParams()))
-      )
+    this.sort.sortChange.subscribe(() => {
+      this.paginator.pageIndex = 0;
+      this.dataSource.loadData(this.createLoadDataParams())
+    });
+
+
+    this.paginator.page.pipe(
+      debounceTime(100),
+      tap((pageEvent: PageEvent) => {
+        let sortValueAndId;
+        let  nextOrPreviousPage: "nextPage" | "previousPage" = "nextPage";
+
+        if (pageEvent.previousPageIndex != null) {
+          nextOrPreviousPage = pageEvent.pageIndex > pageEvent.previousPageIndex ? 'nextPage' : 'previousPage'
+          sortValueAndId = this.dataSource.getSortValueAndId(nextOrPreviousPage, "id", this.sort.active as keyof TableData)
+        }
+
+        this.dataSource.loadData(this.createLoadDataParams({...sortValueAndId, nextOrPreviousPage }))
+
+      }
+      ))
       .subscribe();
 
   }
 
-  createLoadDataParams({ pageNumber = this.paginator.pageIndex,
+  createLoadDataParams({
+    pageNumber = this.paginator.pageIndex,
     pageSize = this.paginator.pageSize,
     textFilter = this.input.nativeElement.value,
     sortFieldName = this.sort.active as keyof TableData,
     sortOrder = this.sort.direction === '' ? 'asc' : this.sort.direction,
+    nextOrPreviousPage = "nextPage",
     sortId = null, sortValue = null, idKey = 'id'
   }: Partial<GetTableDateFilters> = {}): GetTableDateFilters {
     return {
@@ -76,6 +92,7 @@ export class TableComponent implements OnInit {
       sortOrder,
       sortId,
       sortValue,
+      nextOrPreviousPage,
       idKey
     }
   }

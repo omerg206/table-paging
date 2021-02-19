@@ -1,10 +1,7 @@
 import { GetTableDateFilters } from "../../shared/table-data.type";
 import bodybuilder, { Bodybuilder } from 'bodybuilder';
 
-
-
-
-export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters,  isSortFieldOfTextType: boolean): any => {
+export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters, isSortFieldOfTextType: boolean): any => {
     let filterQuery = bodybuilder().size(+filters.pageSize);
 
 
@@ -35,21 +32,28 @@ const getFiledNameForRangeQuery = (filters: GetTableDateFilters, fieldName: keyo
 }
 
 
-const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder,  isSortFieldOfTextType: boolean) => {
-    // if (filters.cursorValue) {
-        if (filters.sortFieldName !== filters.idKey) {
-            filterQuery.sort(
-                getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
-        } else {
-            filterQuery.sort(filters.idKey, 'asc');  
-        }
-   
+const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder, isSortFieldOfTextType: boolean) => {
+    let idFieldDirection: 'asc' | 'desc' = 'asc'
+    if (filters.sortFieldName !== filters.idKey) {
+        filterQuery.sort(
+            getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), getSortDirection(filters.sortOrder, filters.nextOrPreviousPage));
+    } else {
+        idFieldDirection = filters.sortOrder
+    }
 
-   
-    // } else {
-    //     filterQuery.sort(getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
-    // }
+    filterQuery.sort(filters.idKey, getSortDirection(idFieldDirection, filters.nextOrPreviousPage));
+
 }
+
+
+const getSortDirection = (currentDirection: 'asc' | 'desc', nextOrPreviousPage: 'nextPage' | 'previousPage'): 'asc' | 'desc' => {
+    return nextOrPreviousPage === 'previousPage' ? changeSortDirection(currentDirection) : currentDirection;
+}
+
+const changeSortDirection = (currentDirection: 'asc' | 'desc'): 'asc' | 'desc' => {
+    return currentDirection === 'asc' ? 'desc' : 'asc';
+}
+
 
 const getSearchAfterValues = (filters: GetTableDateFilters): any[] => {
     let res: (number | string | Date)[] = [+filters.sortId!];
