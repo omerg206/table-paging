@@ -40,7 +40,7 @@ const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unkn
 }
 
 const handleDateValue = (sortParams: GetTableDateFilters) => {
-    sortParams.sortValue = sortParams.sortFieldName === 'date' ? new Date(sortParams.sortValue as string).getTime() : sortParams.sortFieldName;
+    sortParams.sortValue = sortParams.sortFieldName === 'date' ? new Date(sortParams.sortValue as string).getTime() : sortParams.sortValue;
 
 }
 
