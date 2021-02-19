@@ -19,7 +19,7 @@ const client = new elasticsearch.Client({
 export const getTableData = async (req: Request, res: Response) => {
     try {
         const sortParams: GetTableDateFilters = JSON.parse(req.query.filters as string);
-        handleDateValue(sortParams);
+        mutateAndParseDateValue(sortParams);
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
         const elasticData = await getDataFromElastic(sortParams, isSortFieldOfText);
 
@@ -39,7 +39,7 @@ const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unkn
     return rawHits.map(element => element._source as TableData);
 }
 
-const handleDateValue = (sortParams: GetTableDateFilters) => {
+const mutateAndParseDateValue = (sortParams: GetTableDateFilters) => {
     sortParams.sortValue = sortParams.sortFieldName === 'date' ? new Date(sortParams.sortValue as string).getTime() : sortParams.sortValue;
 
 }
