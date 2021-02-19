@@ -5,7 +5,7 @@ import bodybuilder, { Bodybuilder } from 'bodybuilder';
 
 
 export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters, isCursorFieldOfText: boolean, isSortFieldOfTextType: boolean): any => {
-    let filterQuery = bodybuilder().size(+filters.pageSize || 10000);
+    let filterQuery = bodybuilder().size(+filters.pageSize);
 
 
     if (filters.textFilter) {
