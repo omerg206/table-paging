@@ -41,17 +41,19 @@ const getFiledNameForRangeQuery = (filters: GetTableDateFilters, fieldName: keyo
 
 const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder, isCursorFieldOfText: boolean, isSortFieldOfTextType: boolean) => {
     // if (filters.cursorValue) {
-        filterQuery.sort([
-            {[getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType)] : filters.sortOrder || 'desc'},
-            {id : 'asc'}
-        ]);
+    filterQuery.sort(
+        getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
+
+    if (filters.sortFieldName !== 'id') {
+        filterQuery.sort("id", 'asc');
+    }
     // } else {
     //     filterQuery.sort(getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), filters.sortOrder || 'desc');
     // }
 }
 
 const getSearchAfterValues = (filters: GetTableDateFilters): any[] => {
-    let res: (number | string | Date) [] = [+filters.cursorId!];
+    let res: (number | string | Date)[] = [+filters.cursorId!];
 
     if (filters.sortFieldName) {
         res.unshift(filters.cursorValue!)
