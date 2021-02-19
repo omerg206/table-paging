@@ -3,7 +3,8 @@
     "properties": {
       "author": {
         "type": "text",
-        "copy_to": "test",
+        "analyzer": "my_analyzer",
+        "search_analyzer": "standard",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -17,7 +18,8 @@
       },
       "description": {
         "type": "text",
-        "copy_to": "test",
+        "analyzer": "my_analyzer",
+        "search_analyzer": "standard",
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -27,7 +29,7 @@
       },
       "email": {
         "type": "text",
-        "copy_to": "test",
+
         "fields": {
           "keyword": {
             "type": "keyword",
@@ -50,6 +52,7 @@
         "fields": {
           "keyword": {
             "type": "keyword",
+
             "ignore_above": 256
           }
         }

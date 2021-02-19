@@ -67,8 +67,9 @@ const getDataFromElastic = async (sortFilters: GetTableDateFilters, isCursorFiel
 
 export const insertMockToElastic = async () => {
     try {
+        await createIndex();
         const isIndexEmpty = await client.indices.stats({ index }).then((res) => res.indices[index].total.docs.count === 0);
-
+       
         if (isIndexEmpty) {
             const data = fs.readFileSync(path.join(__dirname, "../utils/mock-data.json"))
             const parsedData: TableData[] = JSON.parse(data.toString());
@@ -92,7 +93,7 @@ export const insertMockToElastic = async () => {
 
 }
 
-const isFieldOfTextType = async (sortParams: GetTableDateFilters, fieldName: "sortFieldName" |  "cursorFiledName"): Promise<boolean> => {
+const isFieldOfTextType = async (sortParams: GetTableDateFilters, fieldName: "sortFieldName" | "cursorFiledName"): Promise<boolean> => {
     try {
         const filedValue = sortParams[fieldName]
         const mapping = await client.indices.getMapping({ index })
