@@ -10,7 +10,7 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
 
     if (filters.textFilter) {
         filterQuery.query('multi_match', 'query', filters.textFilter, {
-            "fields": ["test"], "operator": "and", "analyzer": "my_analyzer"
+            "fields": [], "operator": "and", "analyzer": "my_analyzer"
         })
     }
 
