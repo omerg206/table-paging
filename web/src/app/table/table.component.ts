@@ -97,6 +97,8 @@ export class TableComponent implements OnInit {
     }
   }
 
-
+  trackByFunc(index: number, item: TableData) {
+    return item.id
+  }
 
 }

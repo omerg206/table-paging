@@ -8,6 +8,7 @@
   </div>
 
   <mat-table
+    [trackBy]="trackByFunc"
     class="lessons-table mat-elevation-z8"
     [dataSource]="dataSource"
     matSort
@@ -15,11 +16,10 @@
     matSortDirection="asc"
     matSortDisableClear
   >
+    <div class="spinner-container" *ngIf="dataSource.loading$ | async">
+      <mat-spinner></mat-spinner>
+    </div>
 
-  <div class="spinner-container" *ngIf="dataSource.loading$ | async">
-    <mat-spinner></mat-spinner>
-  </div>
-  
     <ng-container matColumnDef="id">
       <mat-header-cell *matHeaderCellDef mat-sort-header>#</mat-header-cell>
 
@@ -75,7 +75,7 @@
 
   <mat-paginator
     [length]="this.dataSource.getTotalDataNum$ | async"
-    [pageSize]="3"
+    [pageSize]="pageSizeOptions[0]"
     [pageSizeOptions]="pageSizeOptions"
   ></mat-paginator>
 </div>
