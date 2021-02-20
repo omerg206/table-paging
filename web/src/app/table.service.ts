@@ -17,22 +17,17 @@ export class TableService {
 
   }
 
-  getTableData(params: GetTableDateFilters): Observable<TableData[]> {
+  getTableData(params: GetTableDateFilters): Observable<ServerGetTableDataReposes> {
     return this.http.get<ServerGetTableDataReposes>('http://localhost:3000' + Routes.GET_TABLE_DATA, {
       params: new HttpParams()
         .set('filters', JSON.stringify(params))
 
-    }).pipe(
-      tap((res: any) => {
-        console.log(res);
-
-      })
-    );
+    })
   }
 
 
 
- 
+
 
 
 }

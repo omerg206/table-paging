@@ -21,10 +21,6 @@ export const getTableData = async (req: Request, res: Response) => {
         const sortParams: GetTableDateFilters = JSON.parse(req.query.filters as string);
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
         const elasticData = await getDataFromElastic(sortParams, isSortFieldOfText);
-
-        console.log(elasticData.took);
-        
-
         const response: ServerGetTableDataReposes = {
             payload: { data: convertElasticDocToTableData(elasticData, sortParams.nextOrPreviousPage), totalResultCount: elasticData.hits.total }
         }
