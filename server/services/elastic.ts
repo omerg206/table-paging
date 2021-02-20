@@ -3,7 +3,7 @@ import elasticsearch, { SearchResponse } from 'elasticsearch';
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { TableData } from '../../shared/table-data.type';
+import { TableData, NextOrPrevPage } from '../../shared/table-data.type';
 import { createGetTableDataFilterElasticQuery } from './elastic-body-builder';
 import { reduce } from 'lodash';
 
@@ -19,7 +19,6 @@ const client = new elasticsearch.Client({
 export const getTableData = async (req: Request, res: Response) => {
     try {
         const sortParams: GetTableDateFilters = JSON.parse(req.query.filters as string);
-        mutateAndParseDateValue(sortParams);
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
         const elasticData = await getDataFromElastic(sortParams, isSortFieldOfText);
 
@@ -37,21 +36,17 @@ export const getTableData = async (req: Request, res: Response) => {
 }
 
 
-const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unknown>, nextOrPreviousPage: "nextPage" | "previousPage"): TableData[] => {
+const convertElasticDocToTableData = (rawData: elasticsearch.SearchResponse<unknown>, nextOrPreviousPage: NextOrPrevPage): TableData[] => {
     const rawHits = nextOrPreviousPage === 'nextPage' ? rawData.hits.hits : rawData.hits.hits.reverse();
 
     return rawHits.map(element => element._source as TableData);
 }
 
-const mutateAndParseDateValue = (sortParams: GetTableDateFilters) => {
-    sortParams.sortValue = sortParams.sortFieldName === 'date' ? new Date(sortParams.sortValue as string).getTime() : sortParams.sortValue;
-
-}
-
-
 const getDataFromElastic = async (sortFilters: GetTableDateFilters, isSortFieldOfTextType: boolean = false): Promise<elasticsearch.SearchResponse<unknown>> => {
     try {
         const query: any = createGetTableDataFilterElasticQuery(sortFilters, isSortFieldOfTextType);
+        console.log(JSON.stringify(query));
+        
         return await client.search({ index, body: query });
     } catch (e) {
         console.error(e);
@@ -65,7 +60,7 @@ export const insertMockToElastic = async () => {
         const isIndexEmpty = await client.indices.stats({ index }).then((res) => res.indices[index].total.docs.count === 0);
 
         if (isIndexEmpty) {
-            const data = fs.readFileSync(path.join(__dirname, "../utils/mock-data.json"))
+            const data = fs.readFileSync(path.join(__dirname, "../assets/mock-data.json"))
             const parsedData: TableData[] = JSON.parse(data.toString());
 
             const body = parsedData.reduce((acc: any, ele: TableData) => {
@@ -109,10 +104,10 @@ const createIndex = async () => {
     const isIndexExists = await client.indices.exists({ index });
 
     if (!isIndexExists) {
-        const rawSetting = fs.readFileSync(path.join(__dirname, "../utils/settings.json"));
+        const rawSetting = fs.readFileSync(path.join(__dirname, "../assets/settings.json"));
         const parsedSetting: any[] = JSON.parse(rawSetting.toString());
 
-        const rawMapping = fs.readFileSync(path.join(__dirname, "../utils/mapping.json"));
+        const rawMapping = fs.readFileSync(path.join(__dirname, "../assets/mapping.json"));
         const parsedMapping: any[] = JSON.parse(rawMapping.toString());
 
         await client.indices.create({

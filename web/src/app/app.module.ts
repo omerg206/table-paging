@@ -12,13 +12,17 @@ import { MatSortModule } from "@angular/material/sort";
 import { MatTableModule } from "@angular/material/table";
 import {HttpClientModule} from "@angular/common/http";
 import { TableComponent } from './table/table.component';
-
+import {MatNativeDateModule} from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { DatePickerComponent } from './table/date-picker/date-picker.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    TableComponent
+    TableComponent,
+    DatePickerComponent
   ],
   imports: [
     BrowserModule,
@@ -31,6 +35,9 @@ import { TableComponent } from './table/table.component';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatDatepickerModule,
+    MatNativeDateModule,
+    MatFormFieldModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

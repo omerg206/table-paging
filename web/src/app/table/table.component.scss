@@ -5,6 +5,19 @@
   flex-direction: column;
   flex: 1 1 100%;
   position: relative;
+
+  .search-and-date-container {
+    display: flex;
+    justify-content: space-around;
+
+    // mat-form-field.search  {
+
+    //   .mat-form-field-flex{
+    //     background-color: rgba(0, 0, 0, 0.04) !important;
+
+    //   }
+    // }
+  }
 }
 
 .description-cell {
@@ -41,7 +54,9 @@
   flex: 1 1 100%;
 }
 
-
+// .mat-form-field-appearance-fill .mat-form-field-flex {
+//   background-color: rgba(0, 0, 0, 0) !important;
+// }
 
 :host {
   width: 100%;

@@ -7,14 +7,13 @@ import { Routes } from '../shared/routes.types';
 import fs from 'fs';
 import path from 'path';
 import { TableData } from '../shared/table-data.type';
-
-var cors = require('cors');
+import cors from 'cors'
 
 // use it before all route definitions
 
 
 const app: Application = express();
-app.use(cors({ origin: 'http://127.0.0.1:4200' }));
+app.use(cors({ origin: ['http://127.0.0.1:4200', 'http://localhost:4200'] }));
 
 app.route(Routes.GET_TABLE_DATA).get(getTableData);
 
@@ -67,4 +66,4 @@ const httpServer: any = app.listen(3000, () => {
 
 
 
-// readFiles(path.join(__dirname, './utils/mock-data'))
+// readFiles(path.join(__dirname, './assets/mock-data'))

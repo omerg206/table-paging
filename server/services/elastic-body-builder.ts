@@ -1,4 +1,4 @@
-import { GetTableDateFilters } from "../../shared/table-data.type";
+import { GetTableDateFilters, NextOrPrevPage, SortDirection } from '../../shared/table-data.type';
 import bodybuilder, { Bodybuilder } from 'bodybuilder';
 
 export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters, isSortFieldOfTextType: boolean): any => {
@@ -15,8 +15,12 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
         setSortQuery(filters, filterQuery, isSortFieldOfTextType);
     }
 
-    if (filters.dateFilter) {
-        filterQuery.query("range", "date", { lte: filters.dateFilter })
+    if (filters.dateStartFilter) {
+        filterQuery.query("range", filters.dateKey, { gte: convertDateToMilliSec(filters.dateStartFilter) })
+    }
+
+    if (filters.dateEndFilter) {
+        filterQuery.query("range", filters.dateKey, { lte: convertDateToMilliSec(filters.dateEndFilter) })
     }
 
     if (filters.sortValue) {
@@ -27,16 +31,19 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
 }
 
 
-const getFiledNameForRangeQuery = (filters: GetTableDateFilters, fieldName: keyof GetTableDateFilters, isTextType: boolean): string => {
-    return `${filters[fieldName]}${isTextType ? '.keyword' : ''}`;
+
+
+const getFiledNameForRangeQuery = (filters: GetTableDateFilters, isTextType: boolean): string => {
+    return `${filters.sortFieldName}${isTextType ? '.keyword' : ''}`;
 }
 
 
 const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder, isSortFieldOfTextType: boolean) => {
-    let idFieldDirection: 'asc' | 'desc' = 'asc'
+    let idFieldDirection: SortDirection = 'asc'
     if (filters.sortFieldName !== filters.idKey) {
+
         filterQuery.sort(
-            getFiledNameForRangeQuery(filters, "sortFieldName", isSortFieldOfTextType), getSortDirection(filters.sortOrder, filters.nextOrPreviousPage));
+            getFiledNameForRangeQuery(filters, isSortFieldOfTextType), getSortDirection(filters.sortOrder, filters.nextOrPreviousPage));
     } else {
         idFieldDirection = filters.sortOrder
     }
@@ -46,22 +53,27 @@ const setSortQuery = (filters: GetTableDateFilters, filterQuery: Bodybuilder, is
 }
 
 
-const getSortDirection = (currentDirection: 'asc' | 'desc', nextOrPreviousPage: 'nextPage' | 'previousPage'): 'asc' | 'desc' => {
+const getSortDirection = (currentDirection: SortDirection, nextOrPreviousPage: NextOrPrevPage): SortDirection => {
     return nextOrPreviousPage === 'previousPage' ? changeSortDirection(currentDirection) : currentDirection;
 }
 
-const changeSortDirection = (currentDirection: 'asc' | 'desc'): 'asc' | 'desc' => {
+const changeSortDirection = (currentDirection: SortDirection): SortDirection => {
     return currentDirection === 'asc' ? 'desc' : 'asc';
 }
 
 
 const getSearchAfterValues = (filters: GetTableDateFilters): any[] => {
-    let res: (number | string | Date)[] = [+filters.sortId!];
+    let res: (number | string | Date )[] = [+filters.sortId!];
 
     if (filters.sortFieldName !== filters.idKey) {
-        res.unshift(filters.sortValue!)
+        const sortValue = filters.sortFieldName === filters.dateKey ? convertDateToMilliSec(filters.sortValue) : filters.sortValue;
+        res.unshift(sortValue!)
     }
 
 
     return res;
+}
+
+const convertDateToMilliSec = (date: Date | string | number | undefined | null): number | null => {
+    return date ? new Date(date as string).getTime() : null;
 }

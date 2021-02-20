@@ -3,9 +3,10 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { fromEvent, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
-import { GetTableDateFilters, TableData } from '../../../../shared/table-data.type';
+import { GetTableDateFilters, TableData, NextOrPrevPage } from '../../../../shared/table-data.type';
 import { TableService } from '../table.service';
 import { TableDataSource } from './table-data-source';
+import { DateRange } from './date-picker/date-picker.component';
 
 @Component({
   selector: 'app-table',
@@ -60,14 +61,14 @@ export class TableComponent implements OnInit {
       debounceTime(100),
       tap((pageEvent: PageEvent) => {
         let sortValueAndId;
-        let  nextOrPreviousPage: "nextPage" | "previousPage" = "nextPage";
+        let nextOrPreviousPage: NextOrPrevPage = "nextPage";
 
-        if (pageEvent.previousPageIndex != null && pageEvent.pageIndex !== pageEvent.previousPageIndex) {
-          nextOrPreviousPage = pageEvent.pageIndex > pageEvent.previousPageIndex ? 'nextPage' : 'previousPage'
+        if (this.isPageChange(pageEvent)) {
+          nextOrPreviousPage = pageEvent.pageIndex > pageEvent.previousPageIndex! ? 'nextPage' : 'previousPage'
           sortValueAndId = this.dataSource.getSortValueAndId(nextOrPreviousPage, "id", this.sort.active as keyof TableData)
         }
 
-        this.dataSource.loadData(this.createLoadDataParams({...sortValueAndId, nextOrPreviousPage }))
+        this.dataSource.loadData(this.createLoadDataParams({ ...sortValueAndId, nextOrPreviousPage }))
 
       }
       ))
@@ -75,26 +76,36 @@ export class TableComponent implements OnInit {
 
   }
 
-  createLoadDataParams({
-    pageNumber = this.paginator.pageIndex,
-    pageSize = this.paginator.pageSize,
-    textFilter = this.input.nativeElement.value,
-    sortFieldName = this.sort.active as keyof TableData,
-    sortOrder = this.sort.direction === '' ? 'asc' : this.sort.direction,
-    nextOrPreviousPage = "nextPage",
-    sortId = null, sortValue = null, idKey = 'id'
-  }: Partial<GetTableDateFilters> = {}): GetTableDateFilters {
-    return {
-      pageNumber,
-      pageSize,
-      textFilter,
-      sortFieldName,
-      sortOrder,
-      sortId,
-      sortValue,
-      nextOrPreviousPage,
-      idKey
+  onDateChange(date: DateRange | null) {
+    if (date) {
+      this.dataSource.loadData(this.createLoadDataParams({ dateStartFilter: date.start, dateEndFilter: date.end }))
+
     }
+  }
+
+  defaultLoadParamsOptions(): GetTableDateFilters {
+    return {
+      pageNumber: this.paginator.pageIndex,
+      pageSize: this.paginator.pageSize,
+      textFilter: this.input.nativeElement.value,
+      sortFieldName: this.sort.active as keyof TableData,
+      sortOrder: this.sort.direction === '' ? 'asc' : this.sort.direction,
+      nextOrPreviousPage: "nextPage",
+      sortId: null,
+      sortValue: null,
+      idKey: 'id',
+      dateKey: 'date'
+    }
+  }
+
+  createLoadDataParams(params: Partial<GetTableDateFilters> = {}): GetTableDateFilters {
+    const defaultsParams = this.defaultLoadParamsOptions();
+
+    return { ...defaultsParams, ...params };
+  }
+
+  isPageChange(pageEvent: PageEvent): boolean {
+    return pageEvent.previousPageIndex != null && pageEvent.pageIndex !== pageEvent.previousPageIndex
   }
 
   trackByFunc(index: number, item: TableData) {

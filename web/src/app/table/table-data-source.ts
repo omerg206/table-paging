@@ -4,7 +4,7 @@
 import { CollectionViewer, DataSource } from "@angular/cdk/collections";
 import { Observable, BehaviorSubject, of, Subject } from "rxjs";
 import { catchError, finalize } from "rxjs/operators";
-import { GetTableDateFilters,  TableData } from '../../../../shared/table-data.type';
+import { GetTableDateFilters, TableData, NextOrPrevPage } from '../../../../shared/table-data.type';
 import { TableService } from '../table.service';
 
 
@@ -44,7 +44,7 @@ export class TableDataSource implements DataSource<TableData> {
     return this.tableDataSubject.getValue()[index];
   }
 
-  getSortValueAndId(isGetNextPage: "nextPage" | "previousPage", idFieldKey: keyof TableData, sortFiledKey: keyof TableData): Pick<GetTableDateFilters, "sortValue" | "sortId"> {
+  getSortValueAndId(isGetNextPage:NextOrPrevPage, idFieldKey: keyof TableData, sortFiledKey: keyof TableData): Pick<GetTableDateFilters, "sortValue" | "sortId"> {
     const eleIdx: number = isGetNextPage === "nextPage" ? this.tableDataSubject.getValue().length - 1 : 0
     const element = this.getElementByIdx(eleIdx)
 

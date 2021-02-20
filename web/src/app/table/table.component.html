@@ -1,7 +1,11 @@
 <div class="course">
-  <mat-form-field>
-    <input matInput placeholder="Search" #input />
-  </mat-form-field>
+  <div class="search-and-date-container">
+    <mat-form-field class="search">
+      <input matInput placeholder="Search" #input />
+    </mat-form-field>
+
+    <app-date-picker (dateChange)="onDateChange($event)"></app-date-picker>
+  </div>
 
   <div class="spinner-container" *ngIf="dataSource.loading$ | async">
     <mat-spinner></mat-spinner>
