@@ -23,9 +23,13 @@ export const getTableData = async (req: Request, res: Response) => {
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
         const elasticData = await getDataFromElastic(sortParams, isSortFieldOfText);
 
+        console.log(elasticData.took);
+        
+
         const response: ServerGetTableDataReposes = {
             payload: { data: convertElasticDocToTableData(elasticData, sortParams.nextOrPreviousPage), totalResultCount: elasticData.hits.total }
         }
+        
         return res.status(200).json(response);
     } catch (e) {
         return res.status(503).json({ error: `elastic error ${e}` });

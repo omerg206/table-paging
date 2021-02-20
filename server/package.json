@@ -5,6 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "nodemon --exec ts-node ./index.ts",
+    "start:noRestart": "ts-node ./index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -19,7 +19,7 @@ export class TableComponent implements OnInit {
 
   displayedColumns = ["id", "description", "date", "author", "email", "system"];
 
-  pageSizeOptions: number[] = [3, 5, 10, 100, 1000];
+  pageSizeOptions: number[] = [3, 5, 10, 100, 1000, 10000];
 
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
