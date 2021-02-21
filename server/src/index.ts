@@ -1,27 +1,45 @@
 
 
+import 'reflect-metadata';
 import express from 'express';
 import { Application } from "express";
-import { getTableData, insertMockToElastic } from './services/elastic';
-import { Routes } from '../shared/routes.types';
+import { insertMockToElastic } from './services/elastic';
+import { ApolloServer } from 'apollo-server-express';
+import { buildSchema } from 'type-graphql';
 import fs from 'fs';
 import path from 'path';
-import { TableData } from '../shared/table-data.type';
 import cors from 'cors'
+import { HelloResolver } from './resolvers/table-data-resolver';
 
 // use it before all route definitions
 
+const main = async () => {
+  const app: Application = express();
+  app.set("trust proxy", 1)
 
-const app: Application = express();
-app.use(cors({ origin: ['http://127.0.0.1:4200', 'http://localhost:4200'] }));
+// app.use(cors({ origin: ['http://127.0.0.1:4200', 'http://localhost:4200'] }));
 
-app.route(Routes.GET_TABLE_DATA).get(getTableData);
+// app.route(Routes.GET_TABLE_DATA).get(getTableData);
 
 // app.route('/api/courses/:id').get(getCourseById);
 
 // app.route('/api/lessons').get(searchLessons);
 
-insertMockToElastic()
+insertMockToElastic();
+
+
+const apolloServer = new ApolloServer({
+  schema: await buildSchema({
+      resolvers: [HelloResolver],
+      validate: false
+  }),
+  // context: ({ req, res }: MyContext) => ({
+  //     req, res, redis: redisClient,
+  //     userLoader: createUserLoader(), updootLoader: createUpdootLoader()
+  // })
+});
+
+apolloServer.applyMiddleware({ app, cors: false })
 
 const httpServer: any = app.listen(3000, () => {
   console.log("HTTP REST API Server running at http://localhost:" + httpServer.address().port);
@@ -67,3 +85,8 @@ const httpServer: any = app.listen(3000, () => {
 
 
 // readFiles(path.join(__dirname, './assets/mock-data'))
+
+}
+
+main().catch(err => console.log(err)) ;
+

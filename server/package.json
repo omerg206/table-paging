@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "nodemon --exec ts-node ./index.ts",
-    "start:noRestart": "ts-node ./index.ts",
+    "start": "nodemon --exec ts-node ./src/index.ts",
+    "start:noRestart": "ts-node ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,12 +22,16 @@
   },
   "dependencies": {
     "@types/elasticsearch": "^5.0.37",
+    "apollo-server-express": "^2.21.0",
     "bodybuilder": "^2.4.0",
     "cors": "^2.8.5",
     "elasticsearch": "^16.7.2",
     "express": "^4.17.1",
+    "graphql": "^15.5.0",
     "lodash": "^4.17.20",
     "nodemon": "^2.0.7",
-    "ts-node": "^9.1.1"
+    "reflect-metadata": "^0.1.13",
+    "ts-node": "^9.1.1",
+    "type-graphql": "^1.1.1"
   }
 }

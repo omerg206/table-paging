@@ -1,11 +1,11 @@
-import { GetTableDateFilters, ServerGetTableDataReposes } from './../../shared/table-data.type';
+import { GetTableDateFilters, NextOrPrevPage, ServerGetTableDataReposes, TableData } from './../../../shared/table-data.type';
 import elasticsearch, { SearchResponse } from 'elasticsearch';
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { TableData, NextOrPrevPage } from '../../shared/table-data.type';
 import { createGetTableDataFilterElasticQuery } from './elastic-body-builder';
 import { reduce } from 'lodash';
+import { error } from 'console';
 
 
 const index = "table-data"
@@ -16,18 +16,18 @@ const client = new elasticsearch.Client({
 });
 
 
-export const getTableData = async (req: Request, res: Response) => {
+export const getTableData = async (sortParams: GetTableDateFilters) => {
     try {
-        const sortParams: GetTableDateFilters = JSON.parse(req.query.filters as string);
         const isSortFieldOfText = await isFieldOfTextType(sortParams, "sortFieldName");
         const elasticData = await getDataFromElastic(sortParams, isSortFieldOfText);
         const response: ServerGetTableDataReposes = {
             payload: { data: convertElasticDocToTableData(elasticData, sortParams.nextOrPreviousPage), totalResultCount: elasticData.hits.total }
         }
-        
-        return res.status(200).json(response);
+
+        return response
     } catch (e) {
-        return res.status(503).json({ error: `elastic error ${e}` });
+        console.log(e);
+        throw e
     }
 }
 
@@ -42,7 +42,7 @@ const getDataFromElastic = async (sortFilters: GetTableDateFilters, isSortFieldO
     try {
         const query: any = createGetTableDataFilterElasticQuery(sortFilters, isSortFieldOfTextType);
         console.log(JSON.stringify(query));
-        
+
         return await client.search({ index, body: query });
     } catch (e) {
         console.error(e);

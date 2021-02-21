@@ -1,5 +1,5 @@
-import { GetTableDateFilters, NextOrPrevPage, SortDirection } from '../../shared/table-data.type';
 import bodybuilder, { Bodybuilder } from 'bodybuilder';
+import { GetTableDateFilters, SortDirection, NextOrPrevPage } from '../../../shared/table-data.type';
 
 export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters, isSortFieldOfTextType: boolean): any => {
     let filterQuery = bodybuilder().size(+filters.pageSize);
