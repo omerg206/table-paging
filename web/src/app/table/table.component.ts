@@ -2,11 +2,12 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { fromEvent, merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, tap, delay } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, startWith, tap, delay, first } from 'rxjs/operators';
 import { GetTableDateFilters, TableData, NextOrPrevPage } from '../../../../shared/table-data.type';
 import { TableService } from '../table.service';
 import { TableDataSource } from './table-data-source';
 import { DateRange } from './date-picker/date-picker.component';
+import { GetTableDataGQL, GetTableDataDocument } from '../../generated/graphql';
 
 @Component({
   selector: 'app-table',
@@ -37,6 +38,9 @@ export class TableComponent implements OnInit {
     this.dataSource.loadData(this.createLoadDataParams({ pageSize: this.pageSizeOptions[0] } as GetTableDateFilters));
   }
 
+
+
+
   ngAfterViewInit() {
 
     fromEvent(this.input.nativeElement, 'keyup')
@@ -44,6 +48,7 @@ export class TableComponent implements OnInit {
         debounceTime(150),
         distinctUntilChanged(),
         tap(() => {
+
           this.paginator.pageIndex = 0;
 
           this.dataSource.loadData(this.createLoadDataParams())

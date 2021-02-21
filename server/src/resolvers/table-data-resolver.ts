@@ -1,6 +1,21 @@
 import { Field, InputType, Query, Resolver, ObjectType, Arg, Int, Float, FieldResolver, Root } from "type-graphql";
 import { TableData, SortDirection, NextOrPrevPage, ServerGetTableDataReposes } from '../../../shared/table-data.type';
 import { getTableData } from "../services/elastic";
+import { GraphQLScalarType } from 'graphql';
+
+const GraphQLAny = new GraphQLScalarType({
+  name: 'Object',
+  description: 'Can be anything',
+  parseValue(value) {
+    return value
+  },
+  serialize(value) {
+    return value
+  },
+  parseLiteral(ast) {
+    return ast
+  }
+})
 
 @ObjectType()
 class FieldError {
@@ -59,7 +74,7 @@ class TableDataFiltersInput<T = TableData> {
     @Field(() => String)
     nextOrPreviousPage: NextOrPrevPage;
 
-    @Field(() => String, { nullable: true })
+    @Field(() => GraphQLAny, { nullable: true })
     sortValue?: string | number | Date | null;
 
     @Field(() => Float, { nullable: true })
@@ -95,7 +110,7 @@ class ServerGetTableDataReposesType {
 
 
 @Resolver(TableDataResolverType)
-export class HelloResolver {
+export class TableDataResolver {
 
     @FieldResolver(() => String)
     date(@Root() root: TableDataResolverType) {

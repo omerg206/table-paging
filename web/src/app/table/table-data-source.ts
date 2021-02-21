@@ -3,9 +3,11 @@
 
 import { CollectionViewer, DataSource } from "@angular/cdk/collections";
 import { Observable, BehaviorSubject, of, Subject } from "rxjs";
-import { catchError, finalize } from "rxjs/operators";
+import { catchError, finalize, first, map } from 'rxjs/operators';
 import { GetTableDateFilters, TableData, NextOrPrevPage, ServerGetTableDataReposes } from '../../../../shared/table-data.type';
 import { TableService } from '../table.service';
+import { GetTableDataQuery } from '../../generated/graphql';
+import { ApolloQueryResult } from "@apollo/client/core";
 
 
 
@@ -19,29 +21,37 @@ export class TableDataSource implements DataSource<TableData> {
 
   private totalDataNum$: Subject<number> = new Subject<number>();
 
+
   public getTotalDataNum$: Observable<number> = this.totalDataNum$.asObservable();
+
+  private destroy$: Subject<number> = new Subject<number>();
+
 
   constructor(private tableService: TableService) {
 
   }
 
 
-  loadData(params: GetTableDateFilters) {
+  async loadData(params: GetTableDateFilters) {
     this.loadingSubject.next(true);
 
-    this.tableService.getTableData(params).pipe(
+    await this.tableService.getTableData(params).pipe(
+      map((tableData: ApolloQueryResult<GetTableDataQuery>) => {
+
+        if (tableData) {
+          this.tableDataSubject.next(tableData.data.getTableData.payload?.data as TableData[]);
+          console.log(tableData.data.getTableData.payload?.data);
+
+          this.totalDataNum$.next(tableData.data.getTableData.payload?.totalResultCount as number);
+        }
+      }, first()),
       catchError((err) => {
         console.log(err);
         return of(null)
       }),
       finalize(() => this.loadingSubject.next(false))
-    )
-      .subscribe((tableData: ServerGetTableDataReposes | null) => {
-        if (tableData) {
-          this.tableDataSubject.next(tableData.payload.data);
-          this.totalDataNum$.next(tableData.payload.totalResultCount);
-        }
-      });
+    ).toPromise();
+
   }
 
 
@@ -68,6 +78,8 @@ export class TableDataSource implements DataSource<TableData> {
     this.tableDataSubject.complete();
     this.loadingSubject.complete();
     this.totalDataNum$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
 

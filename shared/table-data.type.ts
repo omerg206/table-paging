@@ -20,10 +20,10 @@ export interface GetTableDateFilters<T = TableData> {
     idKey: keyof T;
     dateKey: keyof T;
     nextOrPreviousPage: NextOrPrevPage;
-    sortValue?: string | number | Date  | null;
+    sortValue?: any;
     sortId?: number | null;
-    dateStartFilter?: Date | number | string | null;
-    dateEndFilter?: Date | number | string|  null;
+    dateStartFilter?: any;
+    dateEndFilter?: any;
     textFilter?: string;
 }
 

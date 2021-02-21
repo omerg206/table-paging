@@ -1,0 +1,19 @@
+query GetTableData($input: TableDataFiltersInput!) {
+  getTableData(input: $input) {
+    errors {
+      field
+      message
+    }
+    payload {
+      totalResultCount
+      data {
+        author
+        id
+        date
+        description
+        email
+        system
+      }
+    }
+  }
+}
