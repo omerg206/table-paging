@@ -5,7 +5,7 @@ export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilter
     let filterQuery = bodybuilder().size(+filters.pageSize);
 
 
-    if (filters.textFilter) {
+    if (filters.textFilter != null && filters.textFilter !== '') {
         filterQuery.query('multi_match', 'query', filters.textFilter, {
             "fields": [], "operator": "and", "analyzer": "my_analyzer"
         })
@@ -63,7 +63,7 @@ const changeSortDirection = (currentDirection: SortDirection): SortDirection => 
 
 
 const getSearchAfterValues = (filters: GetTableDateFilters): any[] => {
-    let res: (number | string | Date )[] = [+filters.sortId!];
+    let res: (number | string | Date)[] = [+filters.sortId!];
 
     if (filters.sortFieldName !== filters.idKey) {
         const sortValue = filters.sortFieldName === filters.dateKey ? convertDateToMilliSec(filters.sortValue) : filters.sortValue;

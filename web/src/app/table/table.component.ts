@@ -23,6 +23,8 @@ export class TableComponent implements OnInit {
 
   pageSizeOptions: number[] = [3, 5, 10, 100, 1000, 10000];
 
+  date: DateRange  = {start: null, end: null};
+
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
@@ -84,7 +86,7 @@ export class TableComponent implements OnInit {
   onDateChange(date: DateRange | null) {
     if (date) {
       this.dataSource.loadData(this.createLoadDataParams({ dateStartFilter: date.start, dateEndFilter: date.end }))
-
+      this.date = date;
     }
   }
 
@@ -99,7 +101,9 @@ export class TableComponent implements OnInit {
       sortId: null,
       sortValue: null,
       idKey: 'id',
-      dateKey: 'date'
+      dateKey: 'date',
+      dateStartFilter: this.date.start,
+      dateEndFilter: this.date.end
     }
   }
 

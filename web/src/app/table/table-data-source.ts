@@ -40,8 +40,6 @@ export class TableDataSource implements DataSource<TableData> {
 
         if (tableData) {
           this.tableDataSubject.next(tableData.data.getTableData.payload?.data as TableData[]);
-          console.log(tableData.data.getTableData.payload?.data);
-
           this.totalDataNum$.next(tableData.data.getTableData.payload?.totalResultCount as number);
         }
       }, first()),
