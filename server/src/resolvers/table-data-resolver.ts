@@ -47,6 +47,9 @@ class TableDataResolverType {
     @Field(() => Int, { nullable: true })
     system: number;
 
+    @Field(() => [Int], { nullable: true })
+    children: number[];
+
 
 }
 
@@ -88,6 +91,11 @@ class TableDataFiltersInput<T = TableData> {
 
     @Field(() => String, { nullable: true })
     textFilter?: string;
+
+    
+    @Field(() => Int, { nullable: true })
+    FilterInBySameSystemId? : number
+
 }
 @ObjectType()
 class FilteredData {

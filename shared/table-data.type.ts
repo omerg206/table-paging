@@ -5,6 +5,7 @@ export interface TableData {
     author: string;
     email: string;
     system: number;
+    children: number[];
 }
 
 
@@ -25,6 +26,7 @@ export interface GetTableDateFilters<T = TableData> {
     dateStartFilter?: any;
     dateEndFilter?: any;
     textFilter?: string;
+    FilterInBySameSystemId? : number
 }
 
 

@@ -56,14 +56,17 @@ export const insertMockToElastic = async () => {
         const isIndexEmpty = await client.indices.stats({ index }).then((res) => res.indices[index].total.docs.count === 0);
 
         if (isIndexEmpty) {
-            const data = fs.readFileSync(path.join(__dirname, "../assets/mock-data.json"))
+            const data = fs.readFileSync(path.join(__dirname, "../../assets/mock-data.json"))
             const parsedData: TableData[] = JSON.parse(data.toString());
-
+            parsedData.forEach(ele => {
+                ele.children = [Math.floor(Math.random() *10000), Math.floor(Math.random() *10000), Math.floor(Math.random() *10000)]
+            })
             const body = parsedData.reduce((acc: any, ele: TableData) => {
                 acc.push({ index: { _index: index, _type: '_doc', _id: ele.id } }, ele);
 
                 return acc;
             }, [])
+            
 
             const res = await client.bulk({
                 body,
@@ -100,10 +103,10 @@ const createIndex = async () => {
     const isIndexExists = await client.indices.exists({ index });
 
     if (!isIndexExists) {
-        const rawSetting = fs.readFileSync(path.join(__dirname, "../assets/settings.json"));
+        const rawSetting = fs.readFileSync(path.join(__dirname, "../../assets/settings.json"));
         const parsedSetting: any[] = JSON.parse(rawSetting.toString());
 
-        const rawMapping = fs.readFileSync(path.join(__dirname, "../assets/mapping.json"));
+        const rawMapping = fs.readFileSync(path.join(__dirname, "../../assets/mapping.json"));
         const parsedMapping: any[] = JSON.parse(rawMapping.toString());
 
         await client.indices.create({

@@ -4,6 +4,10 @@
       <input matInput placeholder="Search" #input />
     </mat-form-field>
 
+    <mat-form-field class="include-system">
+      <input matInput type="number" min="1" max="10000" placeholder="must include system" #inputMustIncludeSystem />
+    </mat-form-field>
+
     <app-date-picker (dateChange)="onDateChange($event)"></app-date-picker>
   </div>
 
@@ -74,7 +78,7 @@
 
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 
-    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns" ></mat-row>
   </mat-table>
 
   <mat-paginator

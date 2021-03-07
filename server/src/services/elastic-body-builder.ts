@@ -4,6 +4,10 @@ import { GetTableDateFilters, SortDirection, NextOrPrevPage } from '../../../sha
 export const createGetTableDataFilterElasticQuery = (filters: GetTableDateFilters, isSortFieldOfTextType: boolean): any => {
     let filterQuery = bodybuilder().size(+filters.pageSize);
 
+    if (filters.FilterInBySameSystemId) {
+        filterQuery.filter("term", "children", filters.FilterInBySameSystemId);
+    }
+   
 
     if (filters.textFilter != null && filters.textFilter !== '') {
         filterQuery.query('multi_match', 'query', filters.textFilter, {

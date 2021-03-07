@@ -13,6 +13,7 @@ query GetTableData($input: TableDataFiltersInput!) {
         description
         email
         system
+        children
       }
     }
   }
