@@ -7,7 +7,7 @@ do
   echo index $index
   elasticdump  --input=http://localhost:9200/$index  --output=http://localhost:9201/$index  --type=settings \
   &&elasticdump  --input=http://localhost:9200/$index --output=http://localhost:9201/$index --type=mapping \
-  &&elasticdump  --input=http://localhost:9200/$index --output=http://localhost:9201/$index --type=data --bulk=true --limit=1000
+  &&elasticdump  --input=http://localhost:9200/$index --output=http://localhost:9201/$index --type=data --bulk=true --limit=5000
 done
 
 

@@ -10,14 +10,25 @@ import fs from 'fs';
 import path from 'path';
 import cors from 'cors'
 import { TableDataResolver } from './resolvers/table-data-resolver';
+import { elasticdump } from './services/elasticdump';
 
-// use it before all route definitions
+// elasticdump({
+//   index: 'table-data',
+//   input: 'http://localhost:9200',
+//   output: 'http://localhost:9201',
+//   outputIndex: 'table-data',
+//   delete: true,
+//   dumpTypes: [{ type: 'settings' }, { type: 'mapping' }, { type: 'data', bulk: true, limit: 5000 }]
+// })
+
+
 
 const main = async () => {
   const app: Application = express();
   app.set("trust proxy", 1)
 
   app.use(cors());
+
 
   // app.route(Routes.GET_TABLE_DATA).get(getTableData);
 
@@ -42,6 +53,8 @@ const main = async () => {
   apolloServer.applyMiddleware({ app, cors: true })
 
   const httpServer: any = app.listen(3000, () => {
+
+
     console.log("HTTP REST API Server running at http://localhost:" + httpServer.address().port);
   });
 

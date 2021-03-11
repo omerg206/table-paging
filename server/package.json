@@ -25,6 +25,7 @@
     "apollo-server-express": "^2.21.0",
     "bodybuilder": "^2.4.0",
     "cors": "^2.8.5",
+    "elasticdump": "^6.66.1",
     "elasticsearch": "^16.7.2",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
