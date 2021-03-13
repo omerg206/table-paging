@@ -6,7 +6,6 @@ export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K]
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
-
 export type Scalars = {
   ID: string;
   String: string;
@@ -15,6 +14,8 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
+  /** Can be anything */
+  Object: any;
 };
 
 
@@ -49,6 +50,7 @@ export type TableDataResolverType = {
   date?: Maybe<Scalars['DateTime']>;
   email?: Maybe<Scalars['String']>;
   system?: Maybe<Scalars['Int']>;
+  children?: Maybe<Array<Scalars['Int']>>;
 };
 
 
@@ -66,12 +68,14 @@ export type TableDataFiltersInput = {
   idKey: Scalars['String'];
   dateKey: Scalars['String'];
   nextOrPreviousPage: Scalars['String'];
-  sortValue?: Maybe<Scalars['String']>;
+  sortValue?: Maybe<Scalars['Object']>;
   sortId?: Maybe<Scalars['Float']>;
   dateStartFilter?: Maybe<Scalars['String']>;
   dateEndFilter?: Maybe<Scalars['String']>;
   textFilter?: Maybe<Scalars['String']>;
+  FilterInBySameSystemId?: Maybe<Scalars['Int']>;
 };
+
 
 export type GetTableDataQueryVariables = Exact<{
   input: TableDataFiltersInput;
@@ -80,26 +84,20 @@ export type GetTableDataQueryVariables = Exact<{
 
 export type GetTableDataQuery = (
   { __typename?: 'Query' }
-  & {
-    getTableData: (
-      { __typename?: 'ServerGetTableDataReposesType' }
-      & {
-        errors?: Maybe<(
-          { __typename?: 'FieldError' }
-          & Pick<FieldError, 'field' | 'message'>
-        )>, payload?: Maybe<(
-          { __typename?: 'FilteredData' }
-          & Pick<FilteredData, 'totalResultCount'>
-          & {
-            data?: Maybe<Array<(
-              { __typename?: 'TableDataResolverType' }
-              & Pick<TableDataResolverType, 'author' | 'id' | 'date' | 'description' | 'email' | 'system'>
-            )>>
-          }
-        )>
-      }
-    )
-  }
+  & { getTableData: (
+    { __typename?: 'ServerGetTableDataReposesType' }
+    & { errors?: Maybe<(
+      { __typename?: 'FieldError' }
+      & Pick<FieldError, 'field' | 'message'>
+    )>, payload?: Maybe<(
+      { __typename?: 'FilteredData' }
+      & Pick<FilteredData, 'totalResultCount'>
+      & { data?: Maybe<Array<(
+        { __typename?: 'TableDataResolverType' }
+        & Pick<TableDataResolverType, 'author' | 'id' | 'date' | 'description' | 'email' | 'system' | 'children'>
+      )>> }
+    )> }
+  ) }
 );
 
 export const GetTableDataDocument = gql`
@@ -125,13 +123,13 @@ export const GetTableDataDocument = gql`
 }
     `;
 
-@Injectable({
-  providedIn: 'root'
-})
-export class GetTableDataGQL extends Apollo.Query<GetTableDataQuery, GetTableDataQueryVariables> {
-  document = GetTableDataDocument;
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class GetTableDataGQL extends Apollo.Query<GetTableDataQuery, GetTableDataQueryVariables> {
+    document = GetTableDataDocument;
 
-  constructor(apollo: Apollo.Apollo) {
-    super(apollo);
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
   }
-}
