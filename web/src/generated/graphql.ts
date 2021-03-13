@@ -118,6 +118,7 @@ export const GetTableDataDocument = gql`
         description
         email
         system
+        children
       }
     }
   }
