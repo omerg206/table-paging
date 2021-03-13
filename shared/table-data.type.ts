@@ -1,7 +1,7 @@
 export interface TableData {
     id: number;
     description: string;
-    date: Date | number;
+    date: Date | number | string;
     author: string;
     email: string;
     system: number;
@@ -26,7 +26,7 @@ export interface GetTableDateFilters<T = TableData> {
     dateStartFilter?: any;
     dateEndFilter?: any;
     textFilter?: string;
-    FilterInBySameSystemId? : number
+    FilterInBySameSystemId?: number
 }
 
 

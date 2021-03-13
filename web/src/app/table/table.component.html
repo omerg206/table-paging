@@ -76,6 +76,15 @@
       }}</mat-cell>
     </ng-container>
 
+    <ng-container matColumnDef="children">
+      <mat-header-cell *matHeaderCellDef mat-sort-header
+        >Children</mat-header-cell
+      >
+      <mat-cell class="children" *matCellDef="let data">
+        {{data.children |json}}
+      </mat-cell>
+    </ng-container>
+
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
 
     <mat-row *matRowDef="let row; columns: displayedColumns" ></mat-row>

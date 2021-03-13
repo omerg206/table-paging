@@ -8,8 +8,8 @@ import { GetTableDateFilters, TableData, NextOrPrevPage, ServerGetTableDataRepos
 import { TableService } from '../table.service';
 import { GetTableDataQuery } from '../../generated/graphql';
 import { ApolloQueryResult } from "@apollo/client/core";
-
-
+import { lowerFirst, some } from 'lodash'
+import { LiveDataFilterService } from "../live-data-filter.service";
 
 export class TableDataSource implements DataSource<TableData> {
 
@@ -19,7 +19,7 @@ export class TableDataSource implements DataSource<TableData> {
 
   public loading$ = this.loadingSubject.asObservable();
 
-  private totalDataNum$: Subject<number> = new Subject<number>();
+  private totalDataNum$: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
 
   public getTotalDataNum$: Observable<number> = this.totalDataNum$.asObservable();
@@ -27,7 +27,7 @@ export class TableDataSource implements DataSource<TableData> {
   private destroy$: Subject<number> = new Subject<number>();
 
 
-  constructor(private tableService: TableService) {
+  constructor(private tableService: TableService, private liveDataFilterService:LiveDataFilterService) {
 
   }
 
@@ -66,6 +66,26 @@ export class TableDataSource implements DataSource<TableData> {
       sortValue: element ? element[sortFiledKey] : undefined
     }
   }
+
+  addLiveData(data: TableData, filters: Pick<GetTableDateFilters, 'sortFieldName' | 'sortOrder' | "FilterInBySameSystemId" | "textFilter" | 'pageSize' | "dateEndFilter" | "dateStartFilter">) {
+    const insertIdx = this.liveDataFilterService.getIndexOfNewData(this.tableDataSubject.getValue(), data, filters);
+
+    if (insertIdx !== -1) {
+      const currentData = [...this.tableDataSubject.getValue()];
+      currentData.splice(insertIdx, 0, data)
+
+       if (currentData.length > filters.pageSize) { //if page is full make space for new data element
+         currentData.pop()
+       }
+
+       this.tableDataSubject.next(currentData);
+       this.totalDataNum$.next(this.totalDataNum$.getValue() + 1)
+     }
+
+  }
+
+
+
 
 
   connect(collectionViewer: CollectionViewer): Observable<TableData[]> {

@@ -27,6 +27,7 @@
     "graphql": "^15.5.0",
     "graphql-tag": "^2.11.0",
     "http-server": "^0.12.3",
+    "lodash": "^4.17.21",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.3"
@@ -40,6 +41,7 @@
     "@graphql-codegen/typescript-apollo-angular": "^2.3.0",
     "@graphql-codegen/typescript-operations": "1.17.14",
     "@types/jasmine": "~3.6.0",
+    "@types/lodash": "^4.14.168",
     "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
     "jasmine-core": "~3.6.0",

@@ -2,13 +2,12 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { fromEvent, merge, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, startWith, tap, delay, first, takeUntil } from 'rxjs/operators';
-import { GetTableDateFilters, TableData, NextOrPrevPage } from '../../../../shared/table-data.type';
+import { debounceTime, distinctUntilChanged, takeUntil, tap } from 'rxjs/operators';
+import { GetTableDateFilters, NextOrPrevPage, TableData } from '../../../../shared/table-data.type';
+import { LiveDataFilterService } from '../live-data-filter.service';
 import { TableService } from '../table.service';
-import { TableDataSource } from './table-data-source';
 import { DateRange } from './date-picker/date-picker.component';
-import { GetTableDataGQL, GetTableDataDocument } from '../../generated/graphql';
-
+import { TableDataSource } from './table-data-source';
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
@@ -19,7 +18,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
   dataSource!: TableDataSource;
 
-  displayedColumns = ["id", "description", "date", "author", "email", "system"];
+  displayedColumns = ["id", "description", "date", "author", "email", "system", 'children'];
 
   pageSizeOptions: number[] = [3, 5, 10, 100, 1000, 10000];
 
@@ -35,14 +34,14 @@ export class TableComponent implements OnInit, OnDestroy {
 
   @ViewChild('inputMustIncludeSystem', { static: true }) inputMustIncludeSystem!: ElementRef;
 
-  constructor(private tableService: TableService) { }
+  constructor(private tableService: TableService, private liveDataFilterService:LiveDataFilterService) { }
 
 
 
   ngOnInit(): void {
-    this.dataSource = new TableDataSource(this.tableService);
-
+    this.dataSource = new TableDataSource(this.tableService, this.liveDataFilterService);
     this.dataSource.loadData(this.createLoadDataParams({ pageSize: this.pageSizeOptions[0] } as GetTableDateFilters));
+
   }
 
 
@@ -56,7 +55,6 @@ export class TableComponent implements OnInit, OnDestroy {
         tap(() => {
 
           this.paginator.pageIndex = 0;
-          console.log(this.inputMustIncludeSystem.nativeElement.value);
 
           this.dataSource.loadData(this.createLoadDataParams())
         }),
@@ -87,6 +85,10 @@ export class TableComponent implements OnInit, OnDestroy {
       ), takeUntil(this.destroy$))
       .subscribe();
 
+
+    setInterval(() => {
+      this.generateLiveData()
+    }, 1000)
   }
 
   onDateChange(date: DateRange | null) {
@@ -128,6 +130,32 @@ export class TableComponent implements OnInit, OnDestroy {
     return item.id
   }
 
+
+  generateLiveData() {
+    const randomNumber = Math.floor(Math.random() * 100);
+    const randomNumber2 = Math.floor(Math.random() * 100);
+    const randomNumber3 = Math.floor(Math.random() * 100);
+    const newData: TableData = {
+      date: new Date().toISOString() as any,
+      author: 'Author' + randomNumber,
+      children: [randomNumber,randomNumber2,randomNumber3],
+      description: 'bla ' + randomNumber,
+      email: '' + randomNumber + '@gamil.com',
+      id: 11000 + randomNumber * randomNumber,
+      system: randomNumber
+    }
+
+
+    this.dataSource.addLiveData(newData, {...this.defaultLoadParamsOptions()});
+    // setTimeout(() => {
+    //  this.sort.sort({id: 'id', start: 'desc', disableClear: true})
+    // }, 1000);
+    // this.sort.sort({id: sortFieldName, start: sortOrder, disableClear: false})
+
+
+
+
+  }
 
 
 
