@@ -1,5 +1,10 @@
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const fs = require('fs');
+const promisify = require('util').promisify;
+const deleteFile = promisify(fs.unlink);
+
+
 import { forEach } from 'lodash';
 
 export interface CreateElasticDumpCommandParams {
@@ -27,10 +32,10 @@ interface ElasticdumpOptions {
 
 
 export async function elasticdump(params: CreateElasticDumpCommandParams) {
-    try {
-        const inputWithIndex = addAddressToInputOrOutput(params.input, params.index);
-        const outputWithIndex = addAddressToInputOrOutput(params.output, params.outputIndex);
+    const inputWithIndex = addAddressToInputOrOutput(params.input, params.index);
+    const outputWithIndex = addAddressToInputOrOutput(params.output, params.outputIndex);
 
+    try {
         const elasticDumpCommandString = createElasticDumpCommand({ ...params, input: inputWithIndex, output: outputWithIndex });
         console.log('starting elastic dump', elasticDumpCommandString);
 
@@ -43,12 +48,21 @@ export async function elasticdump(params: CreateElasticDumpCommandParams) {
         console.log(stdout);
 
         if (params.delete) {
-            deleteSource(inputWithIndex);
+            deleteIndexOrFile(inputWithIndex);
         }
 
     } catch (e) {
         console.log(e);
+        onErrorDeleteOutput(e, outputWithIndex, params.outputIndex)
     }
+}
+
+function onErrorDeleteOutput({ stderr }: { stderr: string }, outputWithIndex: string, outputIndex?: string) {
+    if (!stderr.includes("already exists")) {
+        const isFile = outputIndex == null;
+        deleteIndexOrFile(outputWithIndex, isFile);
+    }
+
 }
 
 function addOptions(options: ElasticdumpOptions): string {
@@ -56,12 +70,7 @@ function addOptions(options: ElasticdumpOptions): string {
 
     forEach(options, (val: any, key: string) => {
         res += ` ` + transformArgToElasticDumpString((key as keyof ElasticdumpOptions), val);
-
     })
-
-    console.log(res);
-
-
 
     return res;
 }
@@ -93,19 +102,20 @@ function addAddressToInputOrOutput(inputOrOutput: string, index?: string) {
 
 }
 
-async function deleteSource(inputWithIndex: string) {
+async function deleteIndexOrFile(inputOrOutPutWithIndex: string, isFile?: boolean) {
     try {
-        const { stdout, stderr } = await exec(`curl -X DELETE "${inputWithIndex}?pretty`);
-
-        if (stderr) {
-            throw (stderr)
+        if (isFile) {
+            await deleteFile(inputOrOutPutWithIndex);
+        } else {
+            const { stdout, stderr } = await exec(`curl -X DELETE "${inputOrOutPutWithIndex}?pretty`);
+            if (stderr) {
+                throw (stderr)
+            }
         }
 
-        console.log(`deleted data from ${inputWithIndex}`)
-
+        console.log(`deleted data from ${inputOrOutPutWithIndex}`)
     } catch (e) {
         console.log(e);
-
     }
 
 }

@@ -2,6 +2,14 @@ import bodybuilder, { Bodybuilder } from 'bodybuilder';
 import { GetTableDateFilters, SortDirection, NextOrPrevPage } from '../../../shared/table-data.type';
 import { elasticdump } from './elasticdump';
 
+setTimeout(() => {elasticdump({
+    index: 'table-data',
+    input: "http://localhost:9200", //source elastic address
+    output: "my_json.json",//file path or another elastic address
+    dumpTypes: [{
+      type: "settings", 
+    }]})
+}, 5000)
 
 
 
