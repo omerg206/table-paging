@@ -4,8 +4,7 @@ import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { createGetTableDataFilterElasticQuery } from './elastic-body-builder';
-import { reduce } from 'lodash';
-import { error } from 'console';
+
 
 
 const index = "table-data"
@@ -90,7 +89,6 @@ const isFieldOfTextType = async (sortParams: GetTableDateFilters, fieldName: "so
         throw e
     }
 };
-
 
 const deleteIndex = async () => {
     const isIndexExists = await client.indices.exists({ index });

@@ -1,6 +1,6 @@
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-import {forEach} from 'lodash';
+import { forEach } from 'lodash';
 
 export interface CreateElasticDumpCommandParams {
     index: string;
@@ -16,10 +16,13 @@ type ElasticDumpType = 'data' | 'mapping' | 'settings' | 'analyzer' | 'alias' | 
 
 interface ElasticdumpOptions {
     type: ElasticDumpType
-    override?: boolean;
+    overwrite?: boolean;
     bulk?: boolean;
     limit?: number;
+    searchBody?: any;
+    delete?: boolean
 }
+
 
 
 
@@ -30,7 +33,7 @@ export async function elasticdump(params: CreateElasticDumpCommandParams) {
 
         const elasticDumpCommandString = createElasticDumpCommand({ ...params, input: inputWithIndex, output: outputWithIndex });
         console.log('starting elastic dump', elasticDumpCommandString);
-        
+
         const { stdout, stderr } = await exec(elasticDumpCommandString);
 
         if (stderr) {
@@ -45,40 +48,36 @@ export async function elasticdump(params: CreateElasticDumpCommandParams) {
 
     } catch (e) {
         console.log(e);
-        await exec(`curl -X DELETE "${params.input}/${params.index}?pretty`)
-
-
     }
 }
 
 function addOptions(options: ElasticdumpOptions): string {
     let res = ``;
 
-    forEach(options, (val:any, key:  string) => {
-        console.log(val, key);
-        
+    forEach(options, (val: any, key: string) => {
         res += ` ` + transformArgToElasticDumpString((key as keyof ElasticdumpOptions), val);
 
     })
 
-  console.log(res);
-  
+    console.log(res);
+
 
 
     return res;
 }
 
-function transformArgToElasticDumpString(argKey: keyof ElasticdumpOptions | 'input' | 'output', argVal:any): string {
-    return `--${argKey}=${argVal}`
+function transformArgToElasticDumpString(argKey: keyof ElasticdumpOptions | 'input' | 'output', argVal: any): string {
+    const processedArgVal = argKey === 'searchBody' ? dumpSearchQuery(argVal) : argVal;
+    return `--${argKey}=${processedArgVal}`;
 }
 
 
 
-function createElasticDumpCommand({ input, output, dumpTypes = [{type: 'data'}] }: CreateElasticDumpCommandParams): string {
+function createElasticDumpCommand({ input, output, dumpTypes = [{ type: 'data' }] }: CreateElasticDumpCommandParams): string {
     let dumpCommand = ``
     dumpTypes.forEach((dumpType: ElasticdumpOptions, index: number) => {
-        dumpCommand += `${index === 0 ? '' : '&&'}elasticdump ` + transformArgToElasticDumpString('input', input) + 
-           ' ' + transformArgToElasticDumpString('output', output) +  ' ' + addOptions(dumpType) + ' /'
+        dumpCommand += `${index === 0 ? '' : '&&'}elasticdump ` + transformArgToElasticDumpString('input', input) +
+            ' ' + transformArgToElasticDumpString('output', output) + ' ' + addOptions(dumpType) + ' /'
     })
 
     return dumpCommand
@@ -108,6 +107,12 @@ async function deleteSource(inputWithIndex: string) {
         console.log(e);
 
     }
+
+}
+
+//queries only
+function dumpSearchQuery(searchQuery: object): string {
+    return JSON.stringify(searchQuery).replace(/\"/g, '\\\"');
 
 }
 
